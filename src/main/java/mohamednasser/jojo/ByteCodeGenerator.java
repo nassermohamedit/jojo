@@ -33,7 +33,7 @@ public class ByteCodeGenerator {
             PrintWriter stdout = new PrintWriter(out);
             StringWriter err = new StringWriter();
             PrintWriter stderr = new PrintWriter(err);
-            javap.run(stdout, stderr, "-c", wd + "Main.class");
+            javap.run(stdout, stderr, "-c", "-l", wd + "Main.class");
             return out.toString();
         } catch (IOException e) {
             //throw new RuntimeException(e);

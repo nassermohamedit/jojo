@@ -12,6 +12,7 @@ public class JEditor extends JScrollPane {
     private final JTextArea textArea;
 
     public JEditor(CodeChangeListener changeListener) {
+        super();
         textArea = new JTextArea();
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
         textArea.setText("// Write Java code here..\n\n");

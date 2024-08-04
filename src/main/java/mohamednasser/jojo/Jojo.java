@@ -8,47 +8,74 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Jojo {
+public class Jojo extends JFrame {
 
-    private static String workDir = "/home/nasser/.jojo_wd/";
+    private static final int DEFAULT_HEIGHT = 1000;
+    private static final int DEFAULT_WIDTH = 800;
 
-    public static void run() throws IOException {
+    private final String workDir = "/home/nasser/.jojo_wd/";
+    private final ByteCodeGenerator bcg;
+    private final ByteCodeViewer bcv;
+    private final JEditor jeditor;
 
-        Files.createDirectory(Paths.get(workDir));
-        ByteCodeGenerator bcg = new ByteCodeGenerator(workDir);
-        JFrame frame = new JFrame("JoJo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000, 800);
+    public Jojo() {
+        super();
+        prepareWorkDir();
+        bcg = new ByteCodeGenerator(workDir);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setSize(1000, 800);
+        bcv = createByteCodeViewer();
+        jeditor = createJEditor();
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jeditor, bcv);
+        splitPane.setDividerLocation(this.getSize().width/2);
+        this.add(splitPane);
+        this.addWindowListener(new JojoWindowListener());
+        this.setVisible(true);
+    }
 
-        ByteCodeViewer byteCodeViewer = new ByteCodeViewer();
-        JEditor jeditor = new JEditor(
+    private ByteCodeViewer createByteCodeViewer() {
+        ByteCodeViewer bcv = new ByteCodeViewer();
+        bcv.getTextArea().setEditable(false);
+        return bcv;
+    }
+
+    private JEditor createJEditor() {
+        return new JEditor(
                 code -> {
                     String result = bcg.getByteCode(code);
-                    byteCodeViewer.getTextArea().setText(result);
+                    bcv.getTextArea().setText(result);
                 }
         );
+    }
 
-        JScrollPane codeScrollPane = new JScrollPane(jeditor);
-        JScrollPane bytecodeScrollPane = new JScrollPane(byteCodeViewer);
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, codeScrollPane, bytecodeScrollPane);
-        splitPane.setDividerLocation(500);
-        frame.add(splitPane);
-
-        frame.addWindowListener(new WindowAdapter() {
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-                try {
-                    FileUtils.deleteDirectory(new File(workDir));
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+    private void prepareWorkDir() {
+        try {
+            Path path = Paths.get(workDir);
+            if (Files.exists(path)) {
+                FileUtils.deleteDirectory(new File(workDir));
             }
-        });
+            Files.createDirectory(path);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
-        frame.setVisible(true);
+    private void cleanResources() {
+        try {
+            FileUtils.deleteDirectory(new File(workDir));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private class JojoWindowListener extends WindowAdapter {
+
+        @Override
+        public void windowClosing(WindowEvent e) {
+            cleanResources();
+        }
     }
 }

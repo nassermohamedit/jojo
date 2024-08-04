@@ -8,15 +8,16 @@ import java.awt.*;
  */
 public class ByteCodeViewer extends JScrollPane {
 
-    private final JTextArea textArea;
+    private final JTextPane textArea;
 
     public ByteCodeViewer() {
-        textArea = new JTextArea();
+        super();
+        textArea = new JTextPane();
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
         super.setViewportView(textArea);
     }
 
-    public JTextArea getTextArea() {
+    public JTextPane getTextArea() {
         return textArea;
     }
 }
